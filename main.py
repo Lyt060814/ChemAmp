@@ -1,4 +1,5 @@
 from Stacking_agent.Stacking import *
+import os
 import argparse
 from tqdm import tqdm
 from Stacking_agent.tools import *
@@ -38,7 +39,21 @@ def main():
         UniMol.set_task(task_name)
     except:
         pass
-    tools =eval(tools)
+    # Safely parse tools only when provided
+    if tools is not None:
+        try:
+            tool_names = eval(tools)  # Get list of tool names as strings
+            # Convert tool names to tool instances
+            tools = []
+            for tool_name in tool_names:
+                # Import the tool class from globals and instantiate it
+                if tool_name in globals():
+                    tool_instance = globals()[tool_name]()
+                    tools.append(tool_instance)
+                else:
+                    raise ValueError(f"Tool '{tool_name}' not found in available tools")
+        except Exception as e:
+            raise ValueError(f"Invalid --tools format. Error: {str(e)}")
 
     task_query,task_description = task2query(task)
     Agent_tool.set_description(task_description)
@@ -62,6 +77,8 @@ def main():
             test_data = json.load(f)
         # with open("./Result/Stacking/Query2SMILES/[['ChemDFM_0', 'Name2SMILES_1'], 'ChemDFM_0']_5_2_10.json",'r',encoding='utf-8')    as f:
             # test_data = json.load(f)
+        # Ensure result directory exists
+        os.makedirs(f"./Result/Stacking/{task}", exist_ok=True)
         for i in tqdm(test_data):
             start_time = time.time()
             smiles = i['SMILES']
@@ -114,6 +131,8 @@ def main():
 
         with open('./Dataset/Molecule_captioning/test.json','r',encoding='utf-8')    as f:
             test_data = json.load(f)
+        # Ensure result directory exists
+        os.makedirs(f"./Result/Stacking/{task}", exist_ok=True)
         for i in tqdm(test_data):
             start_time = time.time()
             smiles = i['SMILES']
@@ -165,6 +184,8 @@ def main():
         
         with open(f'./Dataset/MolecularPropertyPrediction/{task_name}/test.json','r',encoding='utf-8')    as f:
             test_data = json.load(f)
+        # Ensure result directory exists
+        os.makedirs(f"./Result/Stacking/{task}", exist_ok=True)
         for i in tqdm(test_data):
             start_time = time.time()
             smiles = i['SMILES']
@@ -238,9 +259,11 @@ def main():
     try:
         now = datetime.now()
         text_content = str(result)
+        os.makedirs('./log', exist_ok=True)
         with open(f'./log/{task}_{now}.txt', 'w', encoding='utf-8') as file:
             file.write(text_content)
     except:
+        os.makedirs('./log', exist_ok=True)
         with open(f'./log/{task}_{now}.txt', 'w', encoding='utf-8') as file:
             file.write(str(final_score))
 

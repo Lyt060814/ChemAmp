@@ -45,6 +45,8 @@ class UniMol:
         try:
             if smiles in self.query_data:
                 return self.query_data[smiles],0
+            else:
+                return "Please input the 'SMILES' ",0
         except:
             print("error")
             return "Please input the 'SMILES' ",0

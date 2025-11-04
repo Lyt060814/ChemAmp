@@ -1,30 +1,24 @@
 import os
-from openai import AzureOpenAI
+from openai import OpenAI
 from typing import List, Dict
 import time
 import random
-import dashscope
-from http import HTTPStatus
 from dotenv import load_dotenv
 from pathlib import Path
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
 
-AZURE_API_KEY = os.getenv("AZURE_API_KEY")
-AZURE_API_ENDPOINT=os.getenv("AZURE_API_ENDPOINT")
-AZURE_API_VERSION=os.getenv("AZURE_API_VERSION")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-if not AZURE_API_KEY or AZURE_API_ENDPOINT or AZURE_API_VERSION:
-    raise ValueError("Please set your API_KEY in file .env")
+if not OPENROUTER_API_KEY:
+    raise ValueError("Please set your OPENROUTER_API_KEY in file .env")
 
 
 class ChatModel():
-    def __init__(self, model="gpt-4o", temperature=0.7):
+    def __init__(self, model="openai/gpt-4o", temperature=0.7):
         self.model = model
         self.temperature = temperature
-        os.environ["OPENAI_API_TYPE"] = "azure"
-        self.api_keys = AZURE_API_KEY
-        self.api_endpoints = AZURE_API_ENDPOINT
+        self.api_key = OPENROUTER_API_KEY
     def chat(self, prompt: str, history: List[Dict[str, str]], system_prompt: str = 'You are a helpful assistant',stop_word:str='') -> str:
         """
         Get response with the prompt,history and system prompt.
@@ -43,14 +37,9 @@ class ChatModel():
             messages.append(entry)
         messages.append({"role": "user", "content": prompt})
 
-        chosen_index = random.randint(0, len(self.api_keys) - 1)
-        chosen_key = self.api_keys[chosen_index]
-        chosen_endpoint = self.api_endpoints[chosen_index]
-        
-        client = AzureOpenAI(
-            api_key=chosen_key,
-            api_version=AZURE_API_VERSION,
-            azure_endpoint=chosen_endpoint
+        client = OpenAI(
+            api_key=self.api_key,
+            base_url="https://openrouter.ai/api/v1",
         )
         try:
             response = client.chat.completions.create(

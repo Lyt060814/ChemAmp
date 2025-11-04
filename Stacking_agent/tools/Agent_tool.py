@@ -19,7 +19,9 @@ class Agent_tool:
         self.index = data_index
         self.task_query = Agent_tool.task_query
     def _run(self,query:str,**tool_args)->str:
-        return  self.data[self.index]["answer"]
+        # Get data_index from tool_args if provided, otherwise use self.index
+        data_index = tool_args.get('data_index', self.index)
+        return self.data[data_index]["answer"]
     def test_run(self,query:str,debug=True,**tool_args)->str:
         final,response,hs,all_tokens = self.agent._run(query,[],debug=debug,test=True)
         return final,all_tokens

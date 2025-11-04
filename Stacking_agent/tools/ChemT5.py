@@ -7,8 +7,8 @@ def get_ChemT5_data():
     max_length = 512
     num_beams = 10
 
-    tokenizer = AutoTokenizer.from_pretrained("./multitask-text-and-chemistry-t5-base-augm")
-    model = AutoModelForSeq2SeqLM.from_pretrained("./multitask-text-and-chemistry-t5-base-augm")
+    tokenizer = AutoTokenizer.from_pretrained("/tmp/multitask-text-and-chemistry-t5-base-augm")
+    model = AutoModelForSeq2SeqLM.from_pretrained("/tmp/multitask-text-and-chemistry-t5-base-augm")
 
     import json
     with open("./Dataset/ReactionPrediction/test.json", 'r', encoding='utf-8') as f:
@@ -34,23 +34,27 @@ def get_ChemT5_data():
 # get_ChemT5_data()
 
 def get_ChemT5(query):
-    from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-    max_length = 512
-    num_beams = 10
+    try:
+        from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+        max_length = 512
+        num_beams = 10
 
-    tokenizer = AutoTokenizer.from_pretrained("./multitask-text-and-chemistry-t5-base-augm")
-    model = AutoModelForSeq2SeqLM.from_pretrained("./multitask-text-and-chemistry-t5-base-augm")
+        tokenizer = AutoTokenizer.from_pretrained("/tmp/multitask-text-and-chemistry-t5-base-augm")
+        model = AutoModelForSeq2SeqLM.from_pretrained("/tmp/multitask-text-and-chemistry-t5-base-augm")
 
-    input_text = f"Caption the following molecule: {query}"
+        input_text = f"Caption the following molecule: {query}"
 
-    text = tokenizer(input_text, return_tensors="pt")
-    output = model.generate(input_ids=text["input_ids"], max_length=max_length, num_beams=num_beams)
-    output = tokenizer.decode(output[0].cpu())
+        text = tokenizer(input_text, return_tensors="pt")
+        output = model.generate(input_ids=text["input_ids"], max_length=max_length, num_beams=num_beams)
+        output = tokenizer.decode(output[0].cpu())
 
-    output = output.split(tokenizer.eos_token)[0]
-    output = output.replace(tokenizer.pad_token,"")
-    output = output.strip()
-    return output
+        output = output.split(tokenizer.eos_token)[0]
+        output = output.replace(tokenizer.pad_token,"")
+        output = output.strip()
+        return output
+    except Exception as e:
+        print(f"Error in get_ChemT5: {e}")
+        return f"ChemT5 model not available: {str(e)}"
 
 # ['TextChemT5_0','SMILES2Description_2']
     
@@ -61,20 +65,29 @@ class TextChemT5:
         self,
         **tool_args
     ):
-        with open("./Result/Stacking/Molecule_captioning/Text_ChemT5.json", 'r', encoding='utf-8') as f:
-            data_test = json.load(f)
-        with open("./Result/Stacking/Molecule_captioning/Text_ChemT5_train.json", 'r', encoding='utf-8') as f:
-            data_train = json.load(f)    
-        data = data_test+data_train
-        self.query_data = {i['SMILES']:i['answer'] for i in data}
+        # Try to load precomputed results, but handle missing files gracefully
+        self.query_data = {}
+        try:
+            with open("./Result/Stacking/Molecule_captioning/Text_ChemT5.json", 'r', encoding='utf-8') as f:
+                data_test = json.load(f)
+            with open("./Result/Stacking/Molecule_captioning/Text_ChemT5_train.json", 'r', encoding='utf-8') as f:
+                data_train = json.load(f)    
+            data = data_test+data_train
+            self.query_data = {i['SMILES']:i['answer'] for i in data}
+        except FileNotFoundError:
+            # If precomputed files don't exist, we'll use the model directly
+            # print("Warning: Precomputed TextChemT5 results not found. Will use model directly.")
+            self.query_data = {}
         
     def _run(self, query: str,**tool_args) -> str:
         smiles = query.split("SMILES:")[-1].strip()
         try:
             if smiles in self.query_data:
-                return self.query_data[smiles],0
+                return self.query_data[smiles]
+            else:
+                return get_ChemT5(query)
         except:
-            return get_ChemT5(query),0
+            return get_ChemT5(query)
         
     def __str__(self):
         return "TextChemT5"
@@ -87,5 +100,7 @@ class TextChemT5:
         try:
             if smiles in self.query_data:
                 return self.query_data[smiles],0
+            else:
+                return get_ChemT5(query),0
         except:
             return get_ChemT5(query),0

@@ -22,15 +22,11 @@ pip install -r requirements.txt
 ### Add API keys in `template.env` and change its name to `.env`. 
 
 ```python
-# AZURE for OpenAI Model
-AZURE_API_KEY="your_api_key_here"
-AZURE_API_ENDPOINT="your_api_endpoint_here"
-AZURE_API_VERSION="your_api_version_here"
-# ALI for Llama3 and Deepseek-R1
-ALI_API_KEY="your_api_key_here"
+# OpenRouter for all models (GPT-4o, Llama3, Deepseek-R1)
+OPENROUTER_API_KEY="your_openrouter_api_key_here"
 ```
 
-If you use other API type, Please change the code in the `Stacking_agent/Basemodel.py`
+If you use other API type, Please change the code in the corresponding tool files in `Stacking_agent/tools/` and `Stacking_agent/Basemodel.py`
 
 ### Tools
 

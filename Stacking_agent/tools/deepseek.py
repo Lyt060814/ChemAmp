@@ -5,55 +5,47 @@ from pathlib import Path
 
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
-ALI_API_KEY = os.getenv("ALI_API_KEY")
-if not ALI_API_KEY:
-    raise ValueError("Please set your API_KEY in file .env")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    raise ValueError("Please set your OPENROUTER_API_KEY in file .env")
 
 
 
 
 def get_deepseek(query):
     client = OpenAI(
-        # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
-        api_key=ALI_API_KEY,
-        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        api_key=OPENROUTER_API_KEY,
+        base_url="https://openrouter.ai/api/v1",
     )
-    completion = client.chat.completions.create(
-        model="deepseek-r1", # 此处以 deepseek-r1 为例，可按需更换模型名称。
-        messages=[
-            {"role": "system", "content": "You are a chemistry assistant. Note: Please only output the final answer, no other information and explaination."},
-            {"role": "user", "content": query +"Note: Please only output the final answer, no other information and explaination."}
+    
+    try:
+        completion = client.chat.completions.create(
+            model="deepseek/deepseek-r1",  # OpenRouter model name for DeepSeek-R1
+            messages=[
+                {"role": "system", "content": "You are a chemistry assistant. Note: Please only output the final answer, no other information and explaination."},
+                {"role": "user", "content": query + "Note: Please only output the final answer, no other information and explaination."}
             ],
-        stream=True
+            stream=False  # Simplified to non-streaming for OpenRouter
         )
-
-    reasoning_content = ""
-    # 定义完整回复
-    answer_content = ""
-    for chunk in completion:
-        # 获取思考过程
-        reasoning_chunk = chunk.choices[0].delta.reasoning_content
-        answer_chunk = chunk.choices[0].delta.content
-        if reasoning_chunk != "":
-            # print(reasoning_chunk,end="")
-            reasoning_content += reasoning_chunk
-        elif answer_chunk != "":
-            # print(answer_chunk,end="")
-            answer_content += answer_chunk
-    return answer_content
+        
+        return completion.choices[0].message.content
+        
+    except Exception as e:
+        print(f"Error calling OpenRouter API for DeepSeek: {e}")
+        return "Error"
 
 # print(get_deepseek(''))
 class Deepseek():
     name: str = "Deepseek"
-    description: str = ""
+    description: str = "Input the question, returns answers using Deepseek model. Note: Please only output the final answer, no other information and explanation."
     def __init__(
         self,
         **tool_args
     ):
         super(Deepseek, self).__init__()
 
-    # def _run(self, query: str,**tool_args) -> str:
-    #     return get_Llama(query)
+    def _run(self, query: str,**tool_args) -> str:
+        return get_deepseek(query)
     
     def __str__(self):
         return "Deepseek"

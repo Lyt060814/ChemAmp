@@ -22,12 +22,18 @@ class Chemformer:
         self.query_data = {i['target_smiles']+'>>___':i['answer'] for i in data}
         
     def _run(self, query: str,**tool_args) -> str:
-        query = query.split("the following Chemical reaction equation:")[-1].strip()
+        # Extract reaction equation from query
+        if "the following Chemical reaction equation:" in query:
+            query = query.split("the following Chemical reaction equation:")[-1].strip()
+        else:
+            # If the expected format is not found, use the query as is
+            query = query.strip()
+        
         if query in self.query_data:
             return self.query_data[query],0
         else:
-            print("error")
-            return "Please input the 'SMILES'",0
+            # Return a more helpful message instead of printing "error"
+            return f"No matching reaction found for: {query}",0
         
     def __str__(self):
         return "Chemformer"
@@ -36,11 +42,17 @@ class Chemformer:
         return self.__str__()
     
     def wo_run(self,query):
-        query = query.split("the following Chemical reaction equation:")[-1].strip()
+        # Extract reaction equation from query
+        if "the following Chemical reaction equation:" in query:
+            query = query.split("the following Chemical reaction equation:")[-1].strip()
+        else:
+            # If the expected format is not found, use the query as is
+            query = query.strip()
+        
         if query in self.query_data:
             return self.query_data[query],0
         else:
-            print("error")
-            return "Please input the 'SMILES'",0
+            # Return a more helpful message instead of printing "error"
+            return f"No matching reaction found for: {query}",0
 
 

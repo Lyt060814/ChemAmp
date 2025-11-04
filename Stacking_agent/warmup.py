@@ -110,7 +110,7 @@ class Warmup:
         layer = 0
         score = -1
         Tool_agent= []
-        tool_list = tool
+        tool_list = tool.copy()  # Create a copy to avoid shared state issues
         Score_list = []
         while True:
             if layer == 0:
@@ -120,7 +120,9 @@ class Warmup:
                 wo_agent = False
                 test_agent,blue2,sample_data = self.test(tool_list)
             else:
-                Tool_agent_list = Tool_agent[1:][-(self.tool_number-1):]
+                # Get the last (tool_number-1) agents from this tool's own history
+                num_agents_needed = min(self.tool_number - 1, len(Tool_agent) - 1)
+                Tool_agent_list = Tool_agent[1:][-num_agents_needed:] if num_agents_needed > 0 else []
                 test_agent,blue2,sample_data = self.test(tool_list+Tool_agent_list)
             print(f"The score of the {layer} layer of the {name} stack is {blue2}")
             if blue2 > score:

@@ -1,1 +1,5 @@
 .env
+backups/
+Result/
+__pycache__/
+CLAUDE.md
