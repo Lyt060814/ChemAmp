@@ -255,6 +255,7 @@ rouge_score==0.1.2
 rpds-py==0.21.0
 rsa==4.9
 RXN4Chemistry==1.14.0
+sacremoses==0.1.1
 safetensors==0.4.5
 scholarly==1.7.11
 scikit-learn==1.6.0

@@ -3,3 +3,5 @@ backups/
 Result/
 __pycache__/
 CLAUDE.md
+*.pyc
+Stacking_agent/tools/pretrained_models/

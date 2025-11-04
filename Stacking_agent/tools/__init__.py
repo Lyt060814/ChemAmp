@@ -8,6 +8,7 @@ from .SMILES2Description import SMILES2Description
 from .FinalRefer_agent import FinalRefer_agent
 from .Chat_agent import Chat_agent
 from .ChemT5 import TextChemT5
+from .MolXPT import MolXPT
 from .Unimol import UniMol
 from .llama import Llama
 from .deepseek import Deepseek

@@ -21,6 +21,7 @@ class ToolGenerator:
             'SMILES2Property':'SMILES2Property()',
             'SMILES2Description':'SMILES2Description()',
             'TextChemT5':'TextChemT5()',
+            'MolXPT':'MolXPT()',
             'UniMol':'UniMol()',
             'Llama':'Llama()',
             'Deepseek':'Deepseek()',
